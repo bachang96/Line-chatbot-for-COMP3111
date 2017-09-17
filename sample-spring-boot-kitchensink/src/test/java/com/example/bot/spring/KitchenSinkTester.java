@@ -55,7 +55,7 @@ public class KitchenSinkTester {
 	public void testNotFound() throws Exception {
 		boolean thrown = false;
 		try {
-			this.databaseEngine.search("no");
+			this.databaseEngine.search("abc");
 		} catch (Exception e) {
 			thrown = true;
 		}

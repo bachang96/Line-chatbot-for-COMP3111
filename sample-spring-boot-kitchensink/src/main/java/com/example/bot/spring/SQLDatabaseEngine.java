@@ -11,8 +11,46 @@ import java.net.URI;
 public class SQLDatabaseEngine extends DatabaseEngine {
 	@Override
 	String search(String text) throws Exception {
-		//Write your code here
-		return null;
+		Connection connection = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String result = null;
+
+		try {
+			// Establish connection
+			connection = getConnection();
+
+			// Prepare SQL statement
+			pstmt = connection.prepareStatement(
+				"SELECT response FROM automatedreply " +
+				"WHERE ? LIKE concat('%', LOWER(keyword), '%')"
+			);
+
+			// Format string (?)
+			pstmt.setString(1, text.toLowerCase());
+
+			// Execute query
+			rs = pstmt.executeQuery();
+
+			// Obtain results
+			while(result == null && rs.next()) {
+				result = rs.getString(1);
+			}
+		} catch (SQLException e) {
+			log.info("Exception while connecting to database: {}", e.toString());
+		} finally {
+			// Close connection
+			try {
+				if (rs != null) {rs.close();}
+				if (pstmt != null) {pstmt.close();}
+				if (connection != null) {connection.close();}
+			} catch (SQLException ex) {
+				log.info("Exception while closing connection to database: {}", ex.toString());
+			}
+		}
+		if (result != null)
+			return result;
+		throw new Exception("NOT FOUND");
 	}
 	
 	

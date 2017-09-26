@@ -72,11 +72,11 @@ public class KitchenSinkTester {
 			thrown = true;
 		}
 		assertThat(!thrown);
-		assertThat(result.equals("def"));
+		assertThat(result.contains("def"));
 	}
 
 	@Test
-	public void testSubstring1() throws Exception {
+	public void testSubstring() throws Exception {
 		boolean thrown = false;
 		String result = null;
 		try {
@@ -85,19 +85,19 @@ public class KitchenSinkTester {
 			thrown = true;
 		}
 		assertThat(!thrown);
-		assertThat(result.equals("def"));
+		assertThat(result.contains("def"));
 	}
 
 	@Test
-	public void testSubstring2() throws Exception {
+	public void testNumHits() throws Exception {
 		boolean thrown = false;
 		String result = null;
 		try {
-			result = this.databaseEngine.search("YO PROFESSOR KEVIN");
+			result = this.databaseEngine.search("What is abc?");
 		} catch (Exception e) {
 			thrown = true;
 		}
 		assertThat(!thrown);
-		assertThat(result.equals("Is an amazing TA!"));
+		assertThat(result.matches("^(def )(\\d+)"));
 	}
 }

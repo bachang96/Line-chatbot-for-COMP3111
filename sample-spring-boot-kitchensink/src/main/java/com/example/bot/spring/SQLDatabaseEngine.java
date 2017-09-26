@@ -12,7 +12,8 @@ public class SQLDatabaseEngine extends DatabaseEngine {
 	@Override
 	String search(String text) throws Exception {
 		Connection connection = null;
-		PreparedStatement pstmt = null;
+		PreparedStatement pstmtUpdate = null;
+		PreparedStatement pstmtQuery = null;
 		ResultSet rs = null;
 		String result = null;
 
@@ -20,21 +21,30 @@ public class SQLDatabaseEngine extends DatabaseEngine {
 			// Establish connection
 			connection = getConnection();
 
-			// Prepare SQL statement
-			pstmt = connection.prepareStatement(
-				"SELECT response FROM automatedreply " +
+			// Prepare update statement
+			pstmtUpdate = connection.prepareStatement(
+				"UPDATE automatedreply " +
+				"SET hits = hits+1 " +
 				"WHERE ? LIKE concat('%', LOWER(keyword), '%')"
 			);
+			pstmtUpdate.setString(1, text.toLowerCase());
 
-			// Format string (?)
-			pstmt.setString(1, text.toLowerCase());
+			// Execute update
+			pstmtUpdate.executeUpdate();
+
+			// Prepare query statement
+			pstmtQuery = connection.prepareStatement(
+				"SELECT response, hits FROM automatedreply " +
+				"WHERE ? LIKE concat('%', LOWER(keyword), '%')"
+			);
+			pstmtQuery.setString(1, text.toLowerCase());
 
 			// Execute query
-			rs = pstmt.executeQuery();
+			rs = pstmtQuery.executeQuery();
 
 			// Obtain results
 			while(result == null && rs.next()) {
-				result = rs.getString(1);
+				result = rs.getString(1) + " " + String.valueOf(rs.getInt(2));
 			}
 		} catch (SQLException e) {
 			log.info("Exception while connecting to database: {}", e.toString());
@@ -42,7 +52,8 @@ public class SQLDatabaseEngine extends DatabaseEngine {
 			// Close connection
 			try {
 				if (rs != null) {rs.close();}
-				if (pstmt != null) {pstmt.close();}
+				if (pstmtQuery != null) {pstmtQuery.close();}
+				if (pstmtUpdate != null) {pstmtUpdate.close();}
 				if (connection != null) {connection.close();}
 			} catch (SQLException ex) {
 				log.info("Exception while closing connection to database: {}", ex.toString());

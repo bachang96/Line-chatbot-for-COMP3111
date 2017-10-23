@@ -59,7 +59,7 @@ public class KitchenSinkTester {
 		} catch (Exception e) {
 			thrown = true;
 		}
-		assertThat(thrown);
+		assertThat(thrown).isEqualTo(true);
 	}
 	
 	@Test
